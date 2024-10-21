@@ -1,0 +1,74 @@
+import os
+
+def reset_job_id(file_path):
+    if os.path.isfile(file_path):
+        with open(file_path, 'r') as file:
+            content = file.readlines()
+        
+        new_content = []
+        for line in content:
+            if "local targetJobId =" in line:
+                print(f"บรรทัดก่อนการรีเซ็ต: {line.strip()}")
+                line = 'local targetJobId = "newjobid"  -- JobId ของเซิร์ฟเวอร์ที่ต้องการ hop ไป\n'
+                print(f"บรรทัดหลังการรีเซ็ต: {line.strip()}")
+            new_content.append(line)
+
+        with open(file_path, 'w') as file:
+            file.writelines(new_content)
+        print(f"ได้ทำการรีเซ็ต JobId ใน {file_path} เรียบร้อยแล้ว")
+    else:
+        print(f"ไม่พบไฟล์ {file_path}")
+
+def reset_in_menu(script_path):
+    if os.path.isfile(script_path):
+        with open(script_path, 'r') as file:
+            content = file.readlines()
+
+        new_content = []
+        for line in content:
+            if 'JobId' in line and 'newjobid' not in line:
+                print(f"บรรทัดก่อนการรีเซ็ต: {line.strip()}")
+                line = line.replace(line.split('"')[1], "newjobid")
+                print(f"บรรทัดหลังการรีเซ็ต: {line.strip()}")
+            new_content.append(line)
+
+        with open(script_path, 'w') as file:
+            file.writelines(new_content)
+        print(f"ได้ทำการรีเซ็ต JobId ใน {script_path} เรียบร้อยแล้ว")
+    else:
+        print(f"ไม่พบไฟล์ {script_path}")
+
+def run_python_script():
+    command = 'su -c "cd /sdcard/download && export PATH=$PATH:/data/data/com.termux/files/usr/bin && export TERM=xterm-256color && python3 ./rejoin.py"'
+    os.system(command)
+    print("รัน Python สคริปต์ rejoin.py สำเร็จ")
+
+def display_menu():
+    print("โปรดเลือกตัวเลือกที่ต้องการ:")
+    print("1) รีเซ็ต JobId ใน menu.py และ moon.txt")
+    print("2) รัน Python สคริปต์ rejoin.py")
+    print("3) ออกจากโปรแกรม")
+
+def main():
+    moon_file_path = '/storage/emulated/0/Delta/AUTOexecute/moon.txt'
+    menu_script_path = '/storage/emulated/0/Download/menu.py'
+
+    while True:
+        display_menu()
+        choice = input("เลือกตัวเลือก (1/2/3): ")
+
+        if choice == '1':
+            # รีเซ็ต JobId ใน moon.txt และ menu.py
+            reset_job_id(moon_file_path)
+            reset_in_menu(menu_script_path)
+        elif choice == '2':
+            # รัน Python สคริปต์ rejoin.py
+            run_python_script()
+        elif choice == '3':
+            print("กำลังออกจากโปรแกรม...")
+            break
+        else:
+            print("ตัวเลือกไม่ถูกต้อง โปรดลองอีกครั้ง.")
+
+if __name__ == "__main__":
+    main()
